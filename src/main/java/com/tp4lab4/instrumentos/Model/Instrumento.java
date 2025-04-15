@@ -1,4 +1,4 @@
-package com.tp4lab4.instrumentos;
+package com.tp4lab4.instrumentos.Model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

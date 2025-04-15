@@ -1,4 +1,4 @@
-package com.tp4lab4.instrumentos;
+package com.tp4lab4.instrumentos.Controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.tp4lab4.instrumentos.Model.Instrumento;
+import com.tp4lab4.instrumentos.Service.InstrumentoService;
+import com.tp4lab4.instrumentos.Utils.InstrumentosWrapper;
 
 import lombok.AllArgsConstructor;
 

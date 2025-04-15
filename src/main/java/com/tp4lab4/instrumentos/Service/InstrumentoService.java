@@ -1,9 +1,12 @@
-package com.tp4lab4.instrumentos;
+package com.tp4lab4.instrumentos.Service;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.tp4lab4.instrumentos.Model.Instrumento;
+import com.tp4lab4.instrumentos.Repository.InstrumentosRepository;
 
 @Service
 public class InstrumentoService {

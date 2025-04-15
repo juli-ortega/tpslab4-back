@@ -1,6 +1,8 @@
-package com.tp4lab4.instrumentos;
+package com.tp4lab4.instrumentos.Utils;
 
 import java.util.List;
+
+import com.tp4lab4.instrumentos.Model.Instrumento;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
