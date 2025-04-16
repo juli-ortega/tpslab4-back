@@ -2,6 +2,7 @@ package com.tp4lab4.instrumentos.Model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -38,4 +39,7 @@ public class Instrumento {
 
     @Column(length = 1000)
     private String descripcion;
+
+    @ManyToOne
+    private Categoria categoria;
 }
