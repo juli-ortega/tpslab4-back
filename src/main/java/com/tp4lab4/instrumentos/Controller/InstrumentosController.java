@@ -1,13 +1,24 @@
 package com.tp4lab4.instrumentos.Controller;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Service.InstrumentoService;
 import com.tp4lab4.instrumentos.Utils.InstrumentosWrapper;
@@ -36,15 +47,36 @@ public class InstrumentosController {
         }
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<?> createInstrumento(Instrumento instrumento) {
-        Instrumento savedInstrumento = instrumentoService.saveInstrumento(instrumento);
-        return ResponseEntity.ok(savedInstrumento);
+    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createInstrumento(@RequestPart("instrumento") String instrumentoString, @RequestPart("file") MultipartFile file) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                Instrumento instrumento = objectMapper.readValue(instrumentoString, Instrumento.class);
+                System.out.println(instrumento);
+                instrumento.setImagen(instrumentoService.saveImage(file));
+                Instrumento savedInstrumento = instrumentoService.saveInstrumento(instrumento);
+                return ResponseEntity.ok(savedInstrumento);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el instrumentos: " + e.getMessage());
+            }
     }
+
 
     @PostMapping("/saveAll")
     public ResponseEntity<?> saveAll(@RequestBody InstrumentosWrapper instrumentosWrapper) {
         return ResponseEntity.ok(instrumentoService.saveAll(instrumentosWrapper.getInstrumentos()));
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> updateInstrumento(@PathVariable Long id ,@RequestBody Instrumento instrumento) {
+        Instrumento updatedInstrumento = instrumentoService.updateInstrumento(id, instrumento);
+        return ResponseEntity.ok(updatedInstrumento);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteInstrumento(@PathVariable Long id) {
+        instrumentoService.deleteInstrumento(id);
+        return ResponseEntity.ok("Instrumento deleted successfully");
     }
 
 }
