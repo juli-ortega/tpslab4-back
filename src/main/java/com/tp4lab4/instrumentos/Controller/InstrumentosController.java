@@ -21,8 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tp4lab4.instrumentos.Model.Categoria;
 import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
+import com.tp4lab4.instrumentos.Service.CategoriaService;
 import com.tp4lab4.instrumentos.Service.InstrumentoService;
 import com.tp4lab4.instrumentos.Utils.InstrumentosWrapper;
 
@@ -34,6 +36,7 @@ import lombok.AllArgsConstructor;
 public class InstrumentosController {
 
     private final InstrumentoService instrumentoService;
+    private final CategoriaService categoriaService;
 
     @GetMapping
     public ResponseEntity<List<Instrumento>> getInstrumentos() {
@@ -53,23 +56,30 @@ public class InstrumentosController {
     public ResponseEntity<?> createInstrumento(
             @RequestPart("instrumento") String instrumentoString,
             @RequestPart(value = "file", required = false) MultipartFile file) {
-
+    
         try {
             InstrumentoDto instrumentoDto = new ObjectMapper().readValue(instrumentoString, InstrumentoDto.class);
-
+    
             if (file != null && !file.isEmpty()) {
                 instrumentoDto.setImagen(instrumentoService.saveImage(file));
             }
-
+    
+            // Asegúrate de que la categoría esté correctamente asignada
+            if (instrumentoDto.getCategoria() != null && instrumentoDto.getCategoria().getId() != null) {
+                Categoria categoria = categoriaService.getCategoriaById(instrumentoDto.getCategoria().getId());
+                instrumentoDto.setCategoria(categoria);
+            }
+    
             Instrumento savedInstrumento = instrumentoService.saveInstrumento(
                     instrumentoService.mapDtoToEntity(instrumentoDto));
-
+    
             return ResponseEntity.status(HttpStatus.CREATED).body(savedInstrumento);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     Map.of("error", "Error al procesar la solicitud", "details", e.getMessage()));
         }
     }
+    
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateInstrumento(

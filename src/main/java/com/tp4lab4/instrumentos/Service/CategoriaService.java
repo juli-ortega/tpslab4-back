@@ -19,6 +19,10 @@ public class CategoriaService {
         return categoriaRepository.findAll();
     }
 
+    public Categoria getCategoriaById(Long id) {
+        return categoriaRepository.findById(id).orElse(null);
+    }
+
     public Categoria saveCategoria(Categoria categoria) {
         String denominacion = categoria.getDenominacion().toLowerCase();
         System.out.println(denominacion);
