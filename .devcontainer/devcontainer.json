@@ -11,7 +11,20 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or with the host.
-	"forwardPorts": [5432, 8080]
+	"forwardPorts": [
+		5432,
+		8080
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscjava.vscode-spring-initializr",
+				"vscjava.vscode-spring-boot-dashboard",
+				"vmware.vscode-spring-boot",
+				"vmware.vscode-boot-dev-pack"
+			]
+		}
+	}
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "java -version",

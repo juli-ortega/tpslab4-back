@@ -2,6 +2,8 @@ package com.tp4lab4.instrumentos.Controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,61 +35,64 @@ public class InstrumentosController {
 
     private final InstrumentoService instrumentoService;
 
-    @GetMapping("")
-    public ResponseEntity<?> getInstrumentos() {
+    @GetMapping
+    public ResponseEntity<List<Instrumento>> getInstrumentos() {
         return ResponseEntity.ok(instrumentoService.getAllInstrumentos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getInstrumentoById(@PathVariable Long id) {
-        Instrumento instrumento = instrumentoService.getInstrumentoById(id);
-        if (instrumento != null) {
-            return ResponseEntity.ok(instrumento);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Instrumento> getInstrumentoById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(instrumentoService.getInstrumentoById(id));
     }
 
-    @PostMapping(value = "/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createInstrumento(@RequestPart("instrumento") String instrumentoString, @RequestPart("file") MultipartFile file) throws IOException {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createInstrumento(
+            @RequestPart("instrumento") String instrumentoString,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
         try {
-            System.out.println(instrumentoString);
-            ObjectMapper objectMapper = new ObjectMapper();
-            InstrumentoDto instrumentoDto = objectMapper.readValue(instrumentoString, InstrumentoDto.class);
-            System.out.println(instrumentoDto);
-    
-            // Guardar imagen y setear en el DTO
-            instrumentoDto.setImagen(instrumentoService.saveImage(file));
-    
-            // Mapear DTO a entidad
-            Instrumento instrumento = instrumentoService.mapDtoToEntity(instrumentoDto);
-    
-            // Guardar entidad
-            Instrumento savedInstrumento = instrumentoService.saveInstrumento(instrumento);
-    
-            return ResponseEntity.ok(savedInstrumento);
+            InstrumentoDto instrumentoDto = new ObjectMapper().readValue(instrumentoString, InstrumentoDto.class);
+
+            if (file != null && !file.isEmpty()) {
+                instrumentoDto.setImagen(instrumentoService.saveImage(file));
+            }
+
+            Instrumento savedInstrumento = instrumentoService.saveInstrumento(
+                    instrumentoService.mapDtoToEntity(instrumentoDto));
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedInstrumento);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al guardar el instrumentos: " + e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Error al procesar la solicitud", "details", e.getMessage()));
         }
     }
-    
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateInstrumento(
+            @PathVariable Long id,
+            @RequestPart("instrumento") String instrumentoString,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
 
-    @PostMapping("/saveAll")
-    public ResponseEntity<?> saveAll(@RequestBody InstrumentosWrapper instrumentosWrapper) {
-        return ResponseEntity.ok(instrumentoService.saveAll(instrumentosWrapper.getInstrumentos()));
-    }
+        try {
+            InstrumentoDto instrumentoDto = new ObjectMapper().readValue(instrumentoString, InstrumentoDto.class);
 
-    @PutMapping("/update")
-    public ResponseEntity<?> updateInstrumento(@PathVariable Long id ,@RequestBody Instrumento instrumento) {
-        Instrumento updatedInstrumento = instrumentoService.updateInstrumento(id, instrumento);
-        return ResponseEntity.ok(updatedInstrumento);
+            if (file != null && !file.isEmpty()) {
+                instrumentoDto.setImagen(instrumentoService.saveImage(file));
+            }
+
+            Instrumento updatedInstrumento = instrumentoService.updateInstrumento(
+                    id, instrumentoService.mapDtoToEntity(instrumentoDto));
+
+            return ResponseEntity.ok(updatedInstrumento);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Error al actualizar", "details", e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteInstrumento(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteInstrumento(@PathVariable Long id) {
         instrumentoService.deleteInstrumento(id);
-        return ResponseEntity.ok("Instrumento deleted successfully");
+        return ResponseEntity.noContent().build();
     }
-
 }

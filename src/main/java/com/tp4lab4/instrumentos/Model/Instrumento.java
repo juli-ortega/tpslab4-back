@@ -45,4 +45,9 @@ public class Instrumento {
 
     @ManyToOne
     private Categoria categoria;
+
+    public Object map(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'map'");
+    }
 }
