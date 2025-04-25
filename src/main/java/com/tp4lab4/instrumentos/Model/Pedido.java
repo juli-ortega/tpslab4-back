@@ -22,7 +22,7 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date fecha;
+    private Date fecha = new Date(System.currentTimeMillis());
     private double total;
 
 }
