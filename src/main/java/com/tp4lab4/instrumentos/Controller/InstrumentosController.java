@@ -41,8 +41,12 @@ public class InstrumentosController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Instrumento> getInstrumentoById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(instrumentoService.getInstrumentoById(id));
+    public ResponseEntity<?> getInstrumentoById(@PathVariable Long id) {
+        Instrumento findInstrumento = instrumentoService.getInstrumentoById(id);
+        if (findInstrumento == null) {
+            return ResponseEntity.badRequest().body("Not found");
+        }
+        return ResponseEntity.ok().body(findInstrumento);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,20 +74,58 @@ public class InstrumentosController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateInstrumento(
             @PathVariable Long id,
-            @RequestPart("instrumento") String instrumentoString,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+            @RequestPart("nombre") String nombre,
+            @RequestPart("marca") String marca,
+            @RequestPart("modelo") String modelo,
+            @RequestPart("precio") String precioStr,
+            @RequestPart("costoEnvio") String costoEnvioStr,
+            @RequestPart("cantidadVendida") String cantidadVendidaStr,
+            @RequestPart("descripcion") String descripcion,
+            @RequestPart(value = "imagen", required = false) MultipartFile file) {
 
         try {
-            InstrumentoDto instrumentoDto = new ObjectMapper().readValue(instrumentoString, InstrumentoDto.class);
+            // Convertir los strings a los tipos adecuados
+            Double precio = precioStr != null && !precioStr.isEmpty() ? Double.parseDouble(precioStr) : null;
+            String costoEnvio = costoEnvioStr != null && !costoEnvioStr.isEmpty() ? costoEnvioStr : null;
+            Integer cantidadVendida = cantidadVendidaStr != null && !cantidadVendidaStr.isEmpty()
+                    ? Integer.parseInt(cantidadVendidaStr)
+                    : null;
 
+            // Crear el DTO manualmente
+            InstrumentoDto instrumentoDto = new InstrumentoDto();
+            instrumentoDto.setInstrumento(nombre);
+            instrumentoDto.setMarca(marca);
+            instrumentoDto.setModelo(modelo);
+            instrumentoDto.setPrecio(precio);
+
+            // Manejar el caso especial para costoEnvio
+            if ("G".equalsIgnoreCase(costoEnvio)) {
+                instrumentoDto.setCostoEnvio("G");
+            } else {
+                instrumentoDto.setCostoEnvio(String.valueOf(Double.parseDouble(costoEnvio)));
+            }
+
+            instrumentoDto.setCantidadVendida(cantidadVendida);
+            instrumentoDto.setDescripcion(descripcion);
+
+            // Obtener el instrumento actual de la base de datos
+            Instrumento existingInstrumento = instrumentoService.getInstrumentoById(id);
+
+            // Si hay una nueva imagen, actualizarla
             if (file != null && !file.isEmpty()) {
                 instrumentoDto.setImagen(instrumentoService.saveImage(file));
+            } else {
+                // Mantener la imagen actual si no se proporciona una nueva
+                instrumentoDto.setImagen(existingInstrumento.getImagen());
             }
 
             Instrumento updatedInstrumento = instrumentoService.updateInstrumento(
                     id, instrumentoService.mapDtoToEntity(instrumentoDto));
 
             return ResponseEntity.ok(updatedInstrumento);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("error", "Error en el formato de los números", "details", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     Map.of("error", "Error al actualizar", "details", e.getMessage()));

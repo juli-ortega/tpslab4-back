@@ -16,10 +16,10 @@ import com.tp4lab4.instrumentos.Repository.InstrumentosRepository;
 
 @Service
 public class InstrumentoService {
-    
+
     @Autowired
     private InstrumentosRepository instrumentosRepository;
-    
+
     public List<Instrumento> getAllInstrumentos() {
         return instrumentosRepository.findAll();
     }
@@ -55,7 +55,7 @@ public class InstrumentoService {
 
         return instrumentosRepository.save(existingInstrumento);
     }
-    
+
     public String saveImage(MultipartFile file) throws IOException {
         // Límite de tamaño: 5 MB (5 * 1024 * 1024 bytes)
         long maxSize = 5 * 1024 * 1024;
@@ -88,28 +88,26 @@ public class InstrumentoService {
 
         // Devolver URL pública
         return "http://localhost:8080/uploads/" + uniqueFilename;
-}
+    }
 
-    
-    
     // Validación de magic bytes
     private boolean isImage(byte[] header) {
         // JPG/JPEG
-        if (header[0] == (byte)0xFF && header[1] == (byte)0xD8) {
+        if (header[0] == (byte) 0xFF && header[1] == (byte) 0xD8) {
             return true;
         }
         // PNG
-        if (header[0] == (byte)0x89 && header[1] == (byte)0x50 &&
-            header[2] == (byte)0x4E && header[3] == (byte)0x47) {
+        if (header[0] == (byte) 0x89 && header[1] == (byte) 0x50 &&
+                header[2] == (byte) 0x4E && header[3] == (byte) 0x47) {
             return true;
         }
         // GIF
-        if (header[0] == (byte)0x47 && header[1] == (byte)0x49 &&
-            header[2] == (byte)0x46) {
+        if (header[0] == (byte) 0x47 && header[1] == (byte) 0x49 &&
+                header[2] == (byte) 0x46) {
             return true;
         }
         // BMP
-        if (header[0] == (byte)0x42 && header[1] == (byte)0x4D) {
+        if (header[0] == (byte) 0x42 && header[1] == (byte) 0x4D) {
             return true;
         }
 
