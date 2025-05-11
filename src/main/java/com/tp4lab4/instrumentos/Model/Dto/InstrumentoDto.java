@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class InstrumentoDto {
+    private Long id;
+    
     private String instrumento;
 
     private String marca;
@@ -25,4 +27,6 @@ public class InstrumentoDto {
     private String descripcion;
 
     private Categoria categoria;
+
+    private int cantidad;
 }

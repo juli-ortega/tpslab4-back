@@ -26,4 +26,7 @@ public class PedidoDetalle {
     @ManyToOne
     private Pedido pedido;
 
+    @ManyToOne
+    private Instrumento instrumento;
+
 }

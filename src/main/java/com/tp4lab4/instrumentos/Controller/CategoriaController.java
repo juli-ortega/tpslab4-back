@@ -13,6 +13,8 @@ import com.tp4lab4.instrumentos.Service.CategoriaService;
 import com.tp4lab4.instrumentos.Service.InstrumentoService;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/v1/categoria")
@@ -40,4 +42,9 @@ public class CategoriaController {
                 .toList());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCategoriaById(@RequestParam Long id) {
+        return ResponseEntity.ok(categoriaService.getCategoriaById(id));
+    }
+    
 }

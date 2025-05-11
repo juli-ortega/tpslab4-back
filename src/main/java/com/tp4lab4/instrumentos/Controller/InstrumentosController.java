@@ -91,6 +91,7 @@ public class InstrumentosController {
             @RequestPart("costoEnvio") String costoEnvioStr,
             @RequestPart("cantidadVendida") String cantidadVendidaStr,
             @RequestPart("descripcion") String descripcion,
+            @RequestPart("categoria") String categoria,
             @RequestPart(value = "imagen", required = false) MultipartFile file) {
 
         try {
@@ -100,6 +101,9 @@ public class InstrumentosController {
             Integer cantidadVendida = cantidadVendidaStr != null && !cantidadVendidaStr.isEmpty()
                     ? Integer.parseInt(cantidadVendidaStr)
                     : null;
+            Long categoriaId = Long.parseLong(categoria);
+            Categoria categoriaEntity = categoriaService.getCategoriaById(categoriaId);
+
 
             // Crear el DTO manualmente
             InstrumentoDto instrumentoDto = new InstrumentoDto();
@@ -107,9 +111,10 @@ public class InstrumentosController {
             instrumentoDto.setMarca(marca);
             instrumentoDto.setModelo(modelo);
             instrumentoDto.setPrecio(precio);
+            instrumentoDto.setCategoria(categoriaEntity);
 
             // Manejar el caso especial para costoEnvio
-            if ("G".equalsIgnoreCase(costoEnvio)) {
+            if ("GRATIS".equalsIgnoreCase(costoEnvio)) {
                 instrumentoDto.setCostoEnvio("G");
             } else {
                 instrumentoDto.setCostoEnvio(String.valueOf(Double.parseDouble(costoEnvio)));
