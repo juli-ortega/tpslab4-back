@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tp4lab4.instrumentos.Model.Pedido;
 import com.tp4lab4.instrumentos.Model.PedidoDetalle;
+import com.tp4lab4.instrumentos.Model.PreferenceMp;
 import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
 import com.tp4lab4.instrumentos.Model.Dto.PedidoDto;
 import com.tp4lab4.instrumentos.Service.PedidoDetalleService;
@@ -73,6 +74,13 @@ public class PedidoController {
         } catch (Exception e) {
             throw new RuntimeException("Error en los detalles del pedido", e);
         }
+    }
+
+    @PostMapping("/createmp")
+    public PreferenceMp createPreferenceMercadoPago(@RequestBody Pedido pedido) {
+        MercadoPagoController mercadoPagoController = new MercadoPagoController();
+        PreferenceMp preferenceMp = mercadoPagoController.getPreferenciaIdMercadoPago(pedido);
+        return preferenceMp;
     }
     
 }

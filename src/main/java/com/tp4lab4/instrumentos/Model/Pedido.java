@@ -1,6 +1,8 @@
 package com.tp4lab4.instrumentos.Model;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +24,6 @@ public class Pedido {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Date fecha = new Date(System.currentTimeMillis());
+    private LocalDateTime fecha = LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
     private double total;
-
 }

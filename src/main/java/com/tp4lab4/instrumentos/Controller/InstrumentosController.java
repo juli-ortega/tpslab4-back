@@ -1,7 +1,5 @@
 package com.tp4lab4.instrumentos.Controller;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,9 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +22,6 @@ import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
 import com.tp4lab4.instrumentos.Service.CategoriaService;
 import com.tp4lab4.instrumentos.Service.InstrumentoService;
-import com.tp4lab4.instrumentos.Utils.InstrumentosWrapper;
 
 import lombok.AllArgsConstructor;
 

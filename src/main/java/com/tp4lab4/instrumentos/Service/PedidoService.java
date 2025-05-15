@@ -22,7 +22,7 @@ public class PedidoService {
     }
 
     public List<Pedido> getAllPedidos() {
-        return pedidoRepository.findAll();
+        return pedidoRepository.findAllByOrderByFechaDesc();
     }
 
     public Pedido getPedidoById(Long id) {
