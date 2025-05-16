@@ -1,6 +1,7 @@
 package com.tp4lab4.instrumentos.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,4 +29,11 @@ public class PedidoService {
     public Pedido getPedidoById(Long id) {
         return pedidoRepository.findById(id).orElse(null);
     }
+
+    public Optional<Pedido> findByPreferenceId(String id){
+        return pedidoRepository.findByPreferenceId(id);
+    }
 }
+
+
+
