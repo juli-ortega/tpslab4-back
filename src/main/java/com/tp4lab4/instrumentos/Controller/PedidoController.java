@@ -13,23 +13,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tp4lab4.instrumentos.Model.Pedido;
-import com.tp4lab4.instrumentos.Model.PedidoDetalle;
+
 import com.tp4lab4.instrumentos.Model.PreferenceMp;
-import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
+
 import com.tp4lab4.instrumentos.Model.Dto.PedidoDto;
 import com.tp4lab4.instrumentos.Service.PedidoDetalleService;
 import com.tp4lab4.instrumentos.Service.PedidoService;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/v1/pedido")
 public class PedidoController {
-    
+
     private final PedidoService pedidoService;
     private final PedidoDetalleService pedidoDetalleService;
 
@@ -40,7 +37,8 @@ public class PedidoController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("Pedido", pedidoSaved);
-            response.put("Pedidos detalles", pedidoDetalleService.createPedidoDetalle(pedidoSaved, pedidoRequest.getInstrumentos()));
+            response.put("Pedidos detalles",
+                    pedidoDetalleService.createPedidoDetalle(pedidoSaved, pedidoRequest.getInstrumentos()));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -48,6 +46,31 @@ public class PedidoController {
         }
     }
 
+    @PostMapping("/crear-con-mp")
+    public ResponseEntity<?> crearPedidoConPreferencia(@RequestBody PedidoDto pedidoRequest) {
+        try {
+            // 1. Guardar el pedido en la base de datos
+            Pedido pedidoGuardado = pedidoService.createPedido(pedidoRequest.getPedido());
+
+            // 2. Crear los detalles del pedido
+            var detalles = pedidoDetalleService.createPedidoDetalle(pedidoGuardado, pedidoRequest.getInstrumentos());
+
+            // 3. Crear la preferencia de MercadoPago con el pedido real (con ID y total)
+            MercadoPagoController mercadoPagoController = new MercadoPagoController();
+            PreferenceMp preferencia = mercadoPagoController.getPreferenciaIdMercadoPago(pedidoGuardado, detalles);
+
+            // 4. Responder con todo
+            Map<String, Object> response = new HashMap<>();
+            response.put("pedido", pedidoGuardado);
+            response.put("detalles", detalles);
+            response.put("preferenciaMp", preferencia);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al crear el pedido con preferencia MP", e);
+        }
+    }
 
     @GetMapping("")
     public ResponseEntity<?> getAllPedidos() {
@@ -76,13 +99,11 @@ public class PedidoController {
         }
     }
 
-    @PostMapping("/createmp")
+    /*@PostMapping("/createmp")
     public PreferenceMp createPreferenceMercadoPago(@RequestBody Pedido pedido) {
         MercadoPagoController mercadoPagoController = new MercadoPagoController();
         PreferenceMp preferenceMp = mercadoPagoController.getPreferenciaIdMercadoPago(pedido);
         return preferenceMp;
-    }
-    
+    }*/
+
 }
-
-
