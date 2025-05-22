@@ -1,6 +1,7 @@
 package com.tp4lab4.instrumentos.Service;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -8,12 +9,28 @@ import java.util.List;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Color;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Model.Pedido;
 import com.tp4lab4.instrumentos.Model.PedidoDetalle;
@@ -60,25 +77,44 @@ public class PedidoDetalleService {
 
     public ByteArrayInputStream generarReportePedidos(LocalDateTime fechaDesde, LocalDateTime fechaHasta) throws IOException {
 
-        System.out.println(fechaDesde + "   " + fechaHasta);
         List<Object[]> datos = pedidoDetalleRepository.getReportePedidosDetallado(fechaDesde, fechaHasta);
 
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Pedidos Detallados");
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
+            workbook.setCompressTempFiles(true);
+            SXSSFSheet sheet = workbook.createSheet("Pedidos Detallados");
 
-            Row header = sheet.createRow(0);
             String[] columnas = {"Fecha Pedido", "Instrumento", "Marca", "Modelo", "Cantidad", "Precio", "Subtotal"};
 
+            // Trackeo de columnas para autoSize
+            for (int i = 0; i < columnas.length; i++) {
+                sheet.trackColumnForAutoSizing(i);
+            }
+
+            // Formato de fecha
+            CellStyle dateCellStyle = workbook.createCellStyle();
+            CreationHelper createHelper = workbook.getCreationHelper();
+            short dateFormat = createHelper.createDataFormat().getFormat("dd/MM/yyyy HH:mm");
+            dateCellStyle.setDataFormat(dateFormat);
+
+            // Header
+            Row header = sheet.createRow(0);
             for (int i = 0; i < columnas.length; i++) {
                 Cell cell = header.createCell(i);
                 cell.setCellValue(columnas[i]);
             }
 
+            // Datos
             int fila = 1;
             for (Object[] filaDatos : datos) {
                 Row row = sheet.createRow(fila++);
 
-                row.createCell(0).setCellValue(filaDatos[0].toString());
+                // Columna Fecha Pedido (formateada)
+                Cell fechaCell = row.createCell(0);
+                java.sql.Timestamp ts = (java.sql.Timestamp) filaDatos[0];
+                fechaCell.setCellValue(ts);
+                fechaCell.setCellStyle(dateCellStyle);
+
+                // Resto de las columnas
                 row.createCell(1).setCellValue(filaDatos[1].toString());
                 row.createCell(2).setCellValue(filaDatos[2].toString());
                 row.createCell(3).setCellValue(filaDatos[3].toString());
@@ -87,6 +123,7 @@ public class PedidoDetalleService {
                 row.createCell(6).setCellValue(Double.parseDouble(filaDatos[6].toString()));
             }
 
+            // Ajuste de ancho
             for (int i = 0; i < columnas.length; i++) {
                 sheet.autoSizeColumn(i);
             }

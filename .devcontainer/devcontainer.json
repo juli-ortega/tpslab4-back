@@ -24,7 +24,9 @@
 				"vmware.vscode-boot-dev-pack"
 			]
 		}
-	}
+	},
+	
+	"runArgs": ["-e", "JAVA_TOOL_OPTIONS=-Djava.awt.headless=true"]
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "java -version",

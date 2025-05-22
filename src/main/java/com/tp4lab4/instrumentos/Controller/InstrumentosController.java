@@ -1,8 +1,12 @@
 package com.tp4lab4.instrumentos.Controller;
 
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Color;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.tp4lab4.instrumentos.Model.Categoria;
 import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
@@ -146,5 +161,21 @@ public class InstrumentosController {
     public ResponseEntity<Void> deleteInstrumento(@PathVariable Long id) {
         instrumentoService.deleteInstrumento(id);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> generarPdf(@PathVariable Long id) throws Exception {
+        Instrumento instrumento = instrumentoService.getInstrumentoById(id);
+        if (instrumento == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] pdfBytes = instrumentoService.generarInstrumentoPdf(instrumento);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=instrumento_" + instrumento.getInstrumento()+ ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }

@@ -1,8 +1,12 @@
 package com.tp4lab4.instrumentos.Service;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,6 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Image;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
 import com.tp4lab4.instrumentos.Repository.InstrumentosRepository;
@@ -127,5 +140,66 @@ public class InstrumentoService {
                 .categoria(dto.getCategoria())
                 .build();
     }
+
+   public byte[] generarInstrumentoPdf(Instrumento instrumento) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Document document = new Document(PageSize.A4, 36, 36, 36, 36);
+        PdfWriter.getInstance(document, baos);
+        document.open();
+
+        // Cantidad vendida
+        document.add(new Paragraph(instrumento.getCantidadVendida() + " vendidos", 
+            FontFactory.getFont(FontFactory.HELVETICA, 12)));
+
+        // Nombre del instrumento
+        document.add(new Paragraph(instrumento.getInstrumento(), 
+            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 26)));
+
+        // Precio
+        document.add(new Paragraph("$ " + instrumento.getPrecio(), 
+            FontFactory.getFont(FontFactory.HELVETICA_BOLD, 30)));
+
+        // Marca y modelo
+        document.add(new Paragraph("Marca: " + instrumento.getMarca(), 
+            FontFactory.getFont(FontFactory.HELVETICA, 14)));
+        document.add(new Paragraph("Modelo: " + instrumento.getModelo(), 
+            FontFactory.getFont(FontFactory.HELVETICA, 14)));
+
+        document.add(new Paragraph("\n"));
+
+        // Costo de envío
+        if ("G".equalsIgnoreCase(instrumento.getCostoEnvio())) {
+            document.add(new Paragraph("🚚 Envío gratis a todo el país",
+                FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, Color.green)));
+        } else {
+            document.add(new Paragraph("Costo de envío interior de Argentina: $" + instrumento.getCostoEnvio(),
+                FontFactory.getFont(FontFactory.HELVETICA, 12, Font.BOLD, Color.orange)));
+        }
+
+        document.add(new Paragraph("\n"));
+
+        document.add(new Paragraph("\n"));
+
+        // Imagen
+        try {
+            Image img = Image.getInstance(new URL(instrumento.getImagen()));
+            img.scaleToFit(400, 400);
+            img.setAlignment(Image.ALIGN_CENTER);
+            document.add(img);
+        } catch (Exception e) {
+            document.add(new Paragraph("Imagen no disponible"));
+        }
+
+        document.add(new Paragraph("\n"));
+
+        // Descripción
+        document.add(new Paragraph("Descripción:", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+        document.add(new Paragraph(instrumento.getDescripcion(), FontFactory.getFont(FontFactory.HELVETICA, 12)));
+
+        document.close();
+        return baos.toByteArray();
+    }
+
+
 
 }

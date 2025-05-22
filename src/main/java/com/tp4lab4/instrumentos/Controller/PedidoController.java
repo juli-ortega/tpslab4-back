@@ -179,7 +179,6 @@ public class PedidoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHasta
     ) throws IOException {
 
-        System.out.println("LLEEEEGUEEE "+ fechaDesde + " " + "fecha hasta: " + fechaHasta );
         ByteArrayInputStream excelStream = pedidoDetalleService.generarReportePedidos(fechaDesde, fechaHasta);
 
         HttpHeaders headers = new HttpHeaders();
@@ -190,5 +189,6 @@ public class PedidoController {
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(new InputStreamResource(excelStream));
     }
+
 
 }
