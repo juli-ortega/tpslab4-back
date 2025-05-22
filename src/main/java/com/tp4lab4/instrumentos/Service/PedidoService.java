@@ -33,6 +33,10 @@ public class PedidoService {
     public Optional<Pedido> findByPreferenceId(String id){
         return pedidoRepository.findByPreferenceId(id);
     }
+
+    public List<Object[]> obtenerDatosPedidosParaChart() {
+        return pedidoRepository.obtenerCantidadPedidosPorMes();
+    }
 }
 
 

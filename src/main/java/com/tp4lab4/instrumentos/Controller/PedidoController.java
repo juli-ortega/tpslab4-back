@@ -1,16 +1,28 @@
 package com.tp4lab4.instrumentos.Controller;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tp4lab4.instrumentos.Model.Pedido;
@@ -125,11 +137,58 @@ public class PedidoController {
         }
     }
 
-    /*@PostMapping("/createmp")
-    public PreferenceMp createPreferenceMercadoPago(@RequestBody Pedido pedido) {
-        MercadoPagoController mercadoPagoController = new MercadoPagoController();
-        PreferenceMp preferenceMp = mercadoPagoController.getPreferenciaIdMercadoPago(pedido);
-        return preferenceMp;
-    }*/
+    @GetMapping("/admin/barchart")
+    public ResponseEntity<?> getPedidoByMonth() {
+        try {
+        List<Object[]> datos = pedidoService.obtenerDatosPedidosParaChart();
+
+        List<Object> response = new ArrayList<>();
+        response.add(Arrays.asList("Mes-Año", "Cantidad de Pedidos"));
+
+        for (Object[] fila : datos) {
+            response.add(Arrays.asList(fila[0], ((Number) fila[1]).intValue()));
+        }
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener el pedido", e);
+        }
+    }
+
+    @GetMapping("/admin/piechart")
+    public ResponseEntity<?> getPedidoByCantidadInstrumentos(){
+        try {
+            List<Object[]> rawData = pedidoDetalleService.getPedidosAgrupadosPorInstrumento();
+
+            List<List<Object>> chartData = new ArrayList<>();
+            // Header para el pie chart
+            chartData.add(Arrays.asList("Instrumento", "Cantidad"));
+
+            for (Object[] row : rawData) {
+                chartData.add(Arrays.asList(row[0], ((Number) row[1]).intValue()));
+            }
+            return ResponseEntity.ok(chartData);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al obtener el pedido", e);
+        }
+    }
+
+    @GetMapping("/admin/pedidos-detallado")
+    public ResponseEntity<InputStreamResource> descargarReportePedidos(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDesde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHasta
+    ) throws IOException {
+
+        System.out.println("LLEEEEGUEEE "+ fechaDesde + " " + "fecha hasta: " + fechaHasta );
+        ByteArrayInputStream excelStream = pedidoDetalleService.generarReportePedidos(fechaDesde, fechaHasta);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=pedidos_detallado.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(excelStream));
+    }
 
 }
