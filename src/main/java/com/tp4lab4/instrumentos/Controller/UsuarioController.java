@@ -4,14 +4,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tp4lab4.instrumentos.Model.Usuario;
+import com.tp4lab4.instrumentos.Model.Dto.LoginRequest;
 import com.tp4lab4.instrumentos.Service.UsuarioService;
 
 import lombok.AllArgsConstructor;
 
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @AllArgsConstructor
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UsuarioController {
 
     private UsuarioService usuarioService;
-    
+
     @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody Usuario usuario) {
         try {
@@ -32,12 +33,13 @@ public class UsuarioController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<?> login(@RequestBody String nombreUsuario, @RequestBody String password) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            return ResponseEntity.ok().body(usuarioService.login(nombreUsuario, password));
+            String token = usuarioService.login(loginRequest.getNombreUsuario(), loginRequest.getClave());
+            return ResponseEntity.ok().body(token);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Error de login");
+            return ResponseEntity.badRequest().body("Error de login: " + e.getMessage());
         }
     }
 }
