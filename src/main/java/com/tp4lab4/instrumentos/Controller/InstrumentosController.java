@@ -159,7 +159,7 @@ public class InstrumentosController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInstrumento(@PathVariable Long id) {
-        instrumentoService.deleteInstrumento(id);
+        instrumentoService.softDeleteInstrumento(id);
         return ResponseEntity.noContent().build();
     }
 

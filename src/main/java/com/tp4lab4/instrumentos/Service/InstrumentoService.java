@@ -19,13 +19,12 @@ import com.lowagie.text.FontFactory;
 import com.lowagie.text.Image;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.Paragraph;
-import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.tp4lab4.instrumentos.Model.Instrumento;
 import com.tp4lab4.instrumentos.Model.Dto.InstrumentoDto;
 import com.tp4lab4.instrumentos.Repository.InstrumentosRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class InstrumentoService {
@@ -34,7 +33,7 @@ public class InstrumentoService {
     private InstrumentosRepository instrumentosRepository;
 
     public List<Instrumento> getAllInstrumentos() {
-        return instrumentosRepository.findAll();
+        return instrumentosRepository.findAllActivos();
     }
 
     public Instrumento getInstrumentoById(Long id) {
@@ -45,9 +44,15 @@ public class InstrumentoService {
         return instrumentosRepository.save(instrumento);
     }
 
-    public void deleteInstrumento(Long id) {
-        instrumentosRepository.deleteById(id);
+    @Transactional
+    public void softDeleteInstrumento(Long id) {
+        Instrumento instrumento = instrumentosRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Instrumento no encontrado"));
+
+        instrumento.setDeleted(true);
+        instrumentosRepository.save(instrumento);
     }
+
 
     public List<Instrumento> saveAll(List<Instrumento> instrumentos) {
         return instrumentosRepository.saveAll(instrumentos);

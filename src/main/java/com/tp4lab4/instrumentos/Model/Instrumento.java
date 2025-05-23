@@ -46,6 +46,9 @@ public class Instrumento {
     @ManyToOne
     private Categoria categoria;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted = false;
+
     public Object map(Object object) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'map'");
